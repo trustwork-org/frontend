@@ -1,12 +1,19 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function SignIn() {
-  const { signInWithWallet, signInWithGoogle } = useAuth()
+  const { login, isAuthed, isLoading } = useAuth()
   const navigate = useNavigate()
 
-  const handleWallet = () => { signInWithWallet(); navigate('/') }
-  const handleGoogle = () => { signInWithGoogle(); navigate('/') }
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthed) navigate('/app')
+  }, [isAuthed])
+
+  const handleLogin = () => login()
+
+  if (isLoading) return null
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] flex flex-col items-center justify-center px-4">
@@ -26,13 +33,13 @@ export default function SignIn() {
             Sign in to access your jobs, milestones, and escrow balance.
           </div>
 
-          {/* Connect Wallet */}
+          {/* Single Privy login button — opens Privy modal with all methods */}
           <button
-            onClick={handleWallet}
+            onClick={handleLogin}
             className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-[#14a800] rounded-xl text-[14px] font-semibold text-[#14a800] hover:bg-[#e6f4e1] transition-all mb-3 group"
           >
             <span className="w-9 h-9 rounded-full bg-[#e6f4e1] flex items-center justify-center text-[18px] group-hover:bg-[#14a800] group-hover:text-white transition-all">
-              🦊
+              🔑
             </span>
             <div className="flex-1 text-left">
               <div>Connect Wallet</div>
@@ -48,9 +55,9 @@ export default function SignIn() {
             <div className="flex-1 h-px bg-[#e0e0dc]" />
           </div>
 
-          {/* Google */}
+          {/* Social login */}
           <button
-            onClick={handleGoogle}
+            onClick={handleLogin}
             className="w-full flex items-center gap-3 px-4 py-3.5 border border-[#e0e0dc] rounded-xl text-[14px] font-medium text-[#1c1c1c] hover:bg-[#f7f7f5] hover:border-[#a0a0a0] transition-all group"
           >
             <span className="w-9 h-9 rounded-full bg-[#f7f7f5] flex items-center justify-center text-[18px]">

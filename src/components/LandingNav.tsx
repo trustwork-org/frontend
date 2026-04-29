@@ -10,7 +10,7 @@ const navLinks = [
 
 export default function LandingNav() {
   const [open, setOpen] = useState(false)
-  const { isAuthed, signOut } = useAuth()
+  const { isAuthed, logout } = useAuth()
   const navigate = useNavigate()
 
   const linkCls = ({ isActive }: { isActive: boolean }) =>
@@ -37,7 +37,7 @@ export default function LandingNav() {
               <button onClick={() => navigate('/app')} className="px-4 py-2 bg-[#14a800] text-white rounded-full text-[13px] font-medium hover:bg-[#0d7a00] transition-all">
                 Go to App →
               </button>
-              <button onClick={() => { signOut(); navigate('/') }} className="text-[13px] text-[#6b6b6b] hover:text-red-500 transition-colors">
+              <button onClick={() => { logout().then(() => navigate('/')) }} className="text-[13px] text-[#6b6b6b] hover:text-red-500 transition-colors">
                 Sign out
               </button>
             </>
@@ -69,7 +69,7 @@ export default function LandingNav() {
             {isAuthed ? (
               <>
                 <button onClick={() => { navigate('/app'); setOpen(false) }} className="text-left px-3 py-1.5 text-[14px] text-[#14a800] font-medium">Go to App →</button>
-                <button onClick={() => { signOut(); navigate('/'); setOpen(false) }} className="text-left px-3 py-1.5 text-[13px] text-red-500">Sign out</button>
+                <button onClick={() => { logout().then(() => navigate('/')); setOpen(false) }} className="text-left px-3 py-1.5 text-[13px] text-red-500">Sign out</button>
               </>
             ) : (
               <>

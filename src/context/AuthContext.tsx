@@ -1,47 +1,43 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 import type { ReactNode } from 'react'
-
-interface User {
-  address: string
-  displayName: string
-  provider: 'wallet' | 'google'
-  avatar: string
-}
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 interface AuthContextType {
-  user: User | null
   isAuthed: boolean
-  signInWithWallet: () => void
-  signInWithGoogle: () => void
-  signOut: () => void
+  isLoading: boolean
+  /** Smart wallet address (ERC-4337) or embedded EOA */
+  address: string | null
+  displayAddress: string | null
+  login: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-// Hardcoded mock users
-const MOCK_WALLET_USER: User = {
-  address: '0x4a3f…89b2',
-  displayName: 'AK',
-  provider: 'wallet',
-  avatar: 'AK',
-}
-
-const MOCK_GOOGLE_USER: User = {
-  address: '0x7c1b…22f1',
-  displayName: 'Alex K.',
-  provider: 'google',
-  avatar: 'AK',
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const { ready, authenticated, user, login, logout } = usePrivy()
+  const { wallets } = useWallets()
 
-  const signInWithWallet = () => setUser(MOCK_WALLET_USER)
-  const signInWithGoogle = () => setUser(MOCK_GOOGLE_USER)
-  const signOut = () => setUser(null)
+  // Prefer smart wallet (social login users), fall back to connected EOA (wallet users)
+  const smartWallet = wallets.find(w => w.connectorType === 'smart_wallet')
+  const externalWallet = wallets.find(w => w.connectorType === 'injected' || w.connectorType === 'wallet_connect' || w.connectorType === 'coinbase_wallet')
+  const address = smartWallet?.address ?? externalWallet?.address ?? wallets[0]?.address ?? null
+  const displayAddress = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : null
+
+  // On first login: store email + wallet address in backend so we can send emails
+  useEffect(() => {
+    const email = user?.email?.address
+    if (!authenticated || !address || !email) return
+
+    fetch('/api/account/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ walletAddress: address, email }),
+    }).catch(console.error)
+  }, [authenticated, address])
 
   return (
-    <AuthContext.Provider value={{ user, isAuthed: !!user, signInWithWallet, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ isAuthed: authenticated, isLoading: !ready, address, displayAddress, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

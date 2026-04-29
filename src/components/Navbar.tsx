@@ -18,9 +18,12 @@ const linkCls = ({ isActive }: { isActive: boolean }) =>
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { displayAddress, logout } = useAuth()
 
-  const handleSignOut = () => { signOut(); navigate('/signin') }
+  const handleSignOut = () => { logout().then(() => navigate('/signin')) }
+
+  // Initials for avatar: first two chars of address after '0x'
+  const initials = displayAddress ? displayAddress.slice(2, 4).toUpperCase() : '??'
 
   return (
     <>
@@ -47,7 +50,7 @@ export default function Navbar() {
           </button>
           <div className="relative group">
             <div className="w-8 h-8 rounded-full bg-[#14a800] text-white text-[13px] font-semibold flex items-center justify-center cursor-pointer">
-              {user?.avatar ?? 'AK'}
+              {initials}
             </div>
             <div className="absolute right-0 top-10 bg-white border border-[#e0e0dc] rounded-xl shadow-lg py-1 w-40 hidden group-hover:block z-50">
               <NavLink to="/app/profile" className="block px-4 py-2 text-[13px] text-[#1c1c1c] hover:bg-[#f7f7f5]">Profile</NavLink>
