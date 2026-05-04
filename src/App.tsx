@@ -18,6 +18,7 @@ import PostJob from './pages/PostJob'
 import Dispute from './pages/Dispute'
 import Arbitrate from './pages/Arbitrate'
 import Profile from './pages/Profile'
+import Chat from './pages/Chat'
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/app/post" element={<AppLayout><PostJob /></AppLayout>} />
           <Route path="/app/dispute" element={<AppLayout><Dispute /></AppLayout>} />
           <Route path="/app/arbitrate" element={<AppLayout><Arbitrate /></AppLayout>} />
+          <Route path="/app/chat" element={<AppLayout><Chat /></AppLayout>} />
           <Route path="/app/profile" element={<AppLayout><Profile /></AppLayout>} />
         </Routes>
       </BrowserRouter>
