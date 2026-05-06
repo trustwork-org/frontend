@@ -13,6 +13,7 @@ import SignIn from './pages/SignIn'
 
 // Protected app pages
 import JobBoard from './pages/JobBoard'
+import JobDetail from './pages/JobDetail'
 import Dashboard from './pages/Dashboard'
 import PostJob from './pages/PostJob'
 import Dispute from './pages/Dispute'
@@ -52,6 +53,7 @@ export default function App() {
 
           {/* Protected app routes */}
           <Route path="/app" element={<AppLayout><JobBoard /></AppLayout>} />
+          <Route path="/app/jobs/:jobId" element={<AppLayout><JobDetail /></AppLayout>} />
           <Route path="/app/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
           <Route path="/app/post" element={<AppLayout><PostJob /></AppLayout>} />
           <Route path="/app/dispute" element={<AppLayout><Dispute /></AppLayout>} />
