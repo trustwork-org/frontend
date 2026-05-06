@@ -3,18 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { PrivyProvider } from '@privy-io/react-auth'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { defineChain } from 'viem'
+import { sepolia as viemSepolia } from 'viem/chains'
 import './index.css'
 import App from './App.tsx'
 
 const queryClient = new QueryClient()
 
-export const liskSepolia = defineChain({
-  id: 4202,
-  name: 'Lisk Sepolia',
-  nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: { default: { http: ['https://rpc.sepolia-api.lisk.com'] } },
-  blockExplorers: { default: { name: 'Blockscout', url: 'https://sepolia-blockscout.lisk.com' } },
-  testnet: true,
+const rpcUrl = import.meta.env.VITE_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com'
+
+export const sepolia = defineChain({
+  ...viemSepolia,
+  rpcUrls: { default: { http: [rpcUrl] } },
 })
 
 createRoot(document.getElementById('root')!).render(
@@ -31,8 +30,8 @@ createRoot(document.getElementById('root')!).render(
           embeddedWallets: {
             ethereum: { createOnLogin: 'users-without-wallets' },
           },
-          defaultChain: liskSepolia,
-          supportedChains: [liskSepolia],
+          defaultChain: sepolia,
+          supportedChains: [sepolia],
         }}
       >
         <App />
