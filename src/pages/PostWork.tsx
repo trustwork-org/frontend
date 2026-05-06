@@ -14,7 +14,7 @@ const faqs = [
   { q: 'What if I want to cancel before hiring anyone?', a: 'You get a full refund — including the 2% client fee. No questions asked.' },
   { q: 'What if the freelancer disappears after I hire them?', a: 'If the deadline passes and no milestones have been submitted, you can call a rescue refund after deadline + 30 days.' },
   { q: 'What if the freelancer does poor work?', a: 'You can reject a milestone (freelancer revises and resubmits) or raise a dispute. If the freelancer self-reports poor work, you get a full refund with no fee.' },
-  { q: 'What currency is used?', a: 'All payments are in USDC on Lisk Network. Stable, fast, and no crypto volatility.' },
+  { q: 'What currency is used?', a: 'All payments are in USDC on Ethereum Sepolia. Stable, fast, and no crypto volatility.' },
   { q: 'Do I need a crypto wallet?', a: 'No. You can sign in with Google and a smart contract wallet is created for you automatically. No seed phrases required.' },
 ]
 

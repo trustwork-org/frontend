@@ -185,7 +185,7 @@ export default function Landing() {
             <div className="flex-1 text-center lg:text-left">
               <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
                 className="inline-flex items-center gap-2 px-3 py-1 bg-[#e6f4e1] text-[#0d7a00] rounded-full text-[11px] md:text-[12px] font-medium mb-5">
-                <FiCheckCircle /> Built on Lisk Network · Powered by USDC
+                <FiCheckCircle /> Built on Ethereum Sepolia · Powered by USDC
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.1 }}
@@ -520,7 +520,7 @@ export default function Landing() {
       {/* ── FOOTER ── */}
       <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
         className="border-t border-[#e0e0dc] py-6 text-center text-[12px] text-[#a0a0a0]">
-        TrustWork · Built on Lisk Network · Smart contracts are public and auditable ·{' '}
+        TrustWork · Built on Ethereum Sepolia · Smart contracts are public and auditable ·{' '}
         <a href="#" className="hover:text-[#14a800] transition-colors">View on Explorer</a>
       </motion.footer>
 

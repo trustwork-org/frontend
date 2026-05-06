@@ -80,7 +80,7 @@ export default function SignIn() {
 
         {/* Footer */}
         <div className="text-center mt-5 text-[12px] text-[#a0a0a0]">
-          By signing in you agree to interact with smart contracts on Lisk Network.
+          By signing in you agree to interact with smart contracts on Ethereum Sepolia.
         </div>
       </div>
     </div>

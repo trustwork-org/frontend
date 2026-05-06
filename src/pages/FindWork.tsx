@@ -8,8 +8,8 @@ const jobs = [
     title: 'Senior Solidity Developer — DeFi Escrow Audit & Extension',
     budget: '$4,500 – $7,200', posted: '2h ago', category: 'Smart Contract Dev',
     level: 'Expert', milestones: 3,
-    desc: 'Looking for an experienced Solidity developer to audit our EscrowPlatform contract on Lisk Network. Must have experience with USDC ERC-20 integrations, reentrancy guards, and DAO voting mechanisms.',
-    tags: ['Solidity', 'ERC-20', 'Smart Contract Audit', 'Lisk Network', 'OpenZeppelin'],
+    desc: 'Looking for an experienced Solidity developer to audit our EscrowPlatform contract on Ethereum Sepolia. Must have experience with USDC ERC-20 integrations, reentrancy guards, and DAO voting mechanisms.',
+    tags: ['Solidity', 'ERC-20', 'Smart Contract Audit', 'Ethereum Sepolia', 'OpenZeppelin'],
     proposals: 14,
   },
   {
