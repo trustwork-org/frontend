@@ -60,6 +60,7 @@ export default function App() {
           <Route path="/app/arbitrate" element={<AppLayout><Arbitrate /></AppLayout>} />
           <Route path="/app/chat" element={<AppLayout><Chat /></AppLayout>} />
           <Route path="/app/profile" element={<AppLayout><Profile /></AppLayout>} />
+          <Route path="/app/profile/:address" element={<AppLayout><Profile /></AppLayout>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
