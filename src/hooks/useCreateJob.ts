@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { decodeEventLog } from 'viem'
+import { parseEventLogs } from 'viem'
 import { ADDRESSES, EscrowPlatformAbi, JOB_CATEGORY, type JobCategory } from '../contracts'
 import { publicClient } from '../lib/viem'
 import { useWalletClient } from './useWalletClient'
@@ -100,23 +100,12 @@ export function useCreateJob() {
         setTxHash(hash)
         const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
-        let createdId: bigint | null = null
-        for (const log of receipt.logs) {
-          if (log.address.toLowerCase() !== ADDRESSES.escrowPlatform.toLowerCase()) continue
-          try {
-            const decoded = decodeEventLog({
-              abi: EscrowPlatformAbi,
-              data: log.data,
-              topics: log.topics,
-            })
-            if (decoded.eventName === 'JobCreated') {
-              createdId = (decoded.args as { jobId: bigint }).jobId
-              break
-            }
-          } catch {
-            // not the JobCreated event, ignore
-          }
-        }
+        const events = parseEventLogs({
+          abi: EscrowPlatformAbi,
+          logs: receipt.logs,
+          eventName: 'JobCreated',
+        })
+        const createdId = (events[0]?.args.jobId as bigint | undefined) ?? null
 
         await refreshUSDC()
         setJobId(createdId)
