@@ -4,17 +4,22 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // Vite v8 uses Rolldown by default. Its aggressive code-splitting reorders
-  // module evaluation in a way that breaks viem's nested class hierarchy
-  // ("Class extends value undefined is not a constructor"). Disabling code
-  // splitting forces a single bundle so dependencies always evaluate in the
-  // right order. The bundle is larger; for an MVP demo it's a fine tradeoff.
   build: {
-    rolldownOptions: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
       output: {
-        codeSplitting: false,
+        // Keep each large dependency in its own self-contained chunk so its
+        // internal module load order is preserved. Without this, Rolldown was
+        // hoisting parts of viem's class hierarchy (errors/log.js extends
+        // errors/base.js BaseError) before BaseError was defined, throwing
+        // "Class extends value undefined" at runtime.
+        manualChunks(id: string) {
+          if (id.includes('node_modules/viem/')) return 'viem'
+          if (id.includes('node_modules/@privy-io/')) return 'privy'
+          if (id.includes('node_modules/@tanstack/')) return 'tanstack'
+          if (id.includes('node_modules/wagmi/')) return 'wagmi'
+        },
       },
     },
-    chunkSizeWarningLimit: 4000,
   },
 })
