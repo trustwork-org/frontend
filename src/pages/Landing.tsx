@@ -219,11 +219,6 @@ export default function Landing() {
 
             {/* Copy */}
             <div className="flex-1 text-center lg:text-left">
-              <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-3 py-1 bg-[#e6f4e1] text-[#0d7a00] rounded-full text-[11px] md:text-[12px] font-medium mb-5">
-                <FiCheckCircle /> Built on Ethereum Sepolia · Powered by USDC
-              </motion.div>
-
               <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.1 }}
                 className="text-[32px] sm:text-[40px] md:text-[56px] font-bold leading-[1.15] text-[#1c1c1c] mb-4 md:mb-5"
                 style={{ fontFamily: "'DM Serif Display', serif" }}>

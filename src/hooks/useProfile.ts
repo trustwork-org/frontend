@@ -4,6 +4,7 @@ import {
   EscrowPlatformAbi,
   ProfileRegistryAbi,
   ReputationNFTAbi,
+  erc20Abi,
 } from '../contracts'
 import { publicClient } from '../lib/viem'
 import { fetchJSON } from '../lib/pinata'
@@ -31,10 +32,14 @@ export interface ProfileData {
   tierName: string
 
   // EscrowPlatform
-  escrowJobsCompleted: bigint
-  totalEarnedWei: bigint
+  escrowJobsCompleted: bigint   // count of fully-completed jobs (tier progress)
+  totalEarnedWei: bigint        // running total of all released milestones,
+                                // including currently in-progress jobs
   flags: bigint
   banned: boolean
+
+  // USDC
+  usdcBalance: bigint
 }
 
 const TIER_NAMES = ['', 'Rising Talent', 'Established Pro', 'Expert', 'Elite', 'Legend']
@@ -101,6 +106,21 @@ export function useProfile(address: `0x${string}` | null | undefined) {
           functionName: 'bannedFreelancers' as const,
           args: [address] as const,
         },
+        // The above freelancerTotalEarned only updates when a job fully
+        // completes. To show live earnings (including in-progress jobs)
+        // we need the freelancer's job list and sum amountReleased per job.
+        {
+          address: ADDRESSES.escrowPlatform,
+          abi: EscrowPlatformAbi,
+          functionName: 'getFreelancerJobs' as const,
+          args: [address] as const,
+        },
+        {
+          address: ADDRESSES.usdc,
+          abi: erc20Abi,
+          functionName: 'balanceOf' as const,
+          args: [address] as const,
+        },
       ]
 
       const results = await publicClient.multicall({ contracts, allowFailure: true })
@@ -113,6 +133,32 @@ export function useProfile(address: `0x${string}` | null | undefined) {
       const totalEarnedR = results[5]
       const flagsR = results[6]
       const bannedR = results[7]
+      const freelancerJobsR = results[8]
+      const usdcBalanceR = results[9]
+
+      // For a live earnings figure (including jobs in progress) sum the
+      // amountReleased across all jobs the user is the freelancer on. This
+      // requires a follow-up multicall once we know the job IDs.
+      let liveEarnedWei = totalEarnedR.status === 'success' ? (totalEarnedR.result as bigint) : 0n
+      const freelancerJobIds = (freelancerJobsR.status === 'success' ? (freelancerJobsR.result as readonly bigint[]) : [])
+      if (freelancerJobIds.length > 0) {
+        const jobReads = freelancerJobIds.map(jobId => ({
+          address: ADDRESSES.escrowPlatform,
+          abi: EscrowPlatformAbi,
+          functionName: 'getJob' as const,
+          args: [jobId] as const,
+        }))
+        const jobResults = await publicClient.multicall({ contracts: jobReads, allowFailure: true })
+        let runningTotal = 0n
+        for (const r of jobResults) {
+          if (r.status !== 'success') continue
+          const job = r.result as { amountReleased?: bigint }
+          if (typeof job?.amountReleased === 'bigint') runningTotal += job.amountReleased
+        }
+        // Prefer the live computed total — covers in-progress jobs that the
+        // freelancerTotalEarned mapping won't see until the job completes.
+        if (runningTotal > liveEarnedWei) liveEarnedWei = runningTotal
+      }
 
       const profileTuple =
         getProfileR.status === 'success'
@@ -148,9 +194,10 @@ export function useProfile(address: `0x${string}` | null | undefined) {
         tokenId,
         tierName: TIER_NAMES[tier] || '',
         escrowJobsCompleted: escrowJobsR.status === 'success' ? (escrowJobsR.result as bigint) : 0n,
-        totalEarnedWei: totalEarnedR.status === 'success' ? (totalEarnedR.result as bigint) : 0n,
+        totalEarnedWei: liveEarnedWei,
         flags: flagsR.status === 'success' ? (flagsR.result as bigint) : 0n,
         banned: bannedR.status === 'success' ? (bannedR.result as boolean) : false,
+        usdcBalance: usdcBalanceR.status === 'success' ? (usdcBalanceR.result as bigint) : 0n,
       })
       setError(null)
     } catch (err) {

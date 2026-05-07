@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets, useExportWallet } from '@privy-io/react-auth'
 import { EXPLORER } from '../contracts'
 import { useAuth } from '../context/AuthContext'
 import { useProfile, type ProfileMetadata } from '../hooks/useProfile'
 import { useSaveProfile } from '../hooks/useSaveProfile'
 import { formatUSDC } from '../hooks/useUSDC'
 import { shortAddress } from '../utils/format'
+import { toastError } from '../lib/toast'
 
 const TIERS = [
   { jobs: 5, name: 'Rising Talent' },
@@ -22,6 +23,47 @@ function initials(name: string | undefined, addr: string): string {
     return parts.map(p => p[0]?.toUpperCase() || '').join('') || addr.slice(2, 4).toUpperCase()
   }
   return addr.slice(2, 4).toUpperCase()
+}
+
+/**
+ * For social/email sign-ins, Privy generates a fresh embedded wallet keypair
+ * for the user. Without exporting the private key, that wallet is locked into
+ * Privy's hosted environment — the user cannot move funds via MetaMask or any
+ * other client. This section gives them a "Export private key" button that
+ * opens Privy's secure modal (rendered in an iframe on a separate domain so
+ * our app never sees the key). Hidden for users who signed in with their own
+ * external wallet, since they already control their keys.
+ */
+function WalletExportSection() {
+  const { wallets } = useWallets()
+  const { exportWallet } = useExportWallet()
+  const hasEmbedded = wallets.some(w => w.connectorType === 'embedded')
+
+  if (!hasEmbedded) return null
+
+  const handleExport = async () => {
+    try { await exportWallet() } catch (err) { toastError(err, 'Could not open export modal') }
+  }
+
+  return (
+    <div className="bg-white border border-[#e0e0dc] rounded-xl p-4 md:p-5 mb-3">
+      <div className="text-[14px] md:text-[15px] font-semibold mb-3 pb-2.5 border-b border-[#e0e0dc]">
+        Wallet recovery
+      </div>
+      <div className="text-[13px] text-[#6b6b6b] mb-3 leading-relaxed">
+        Your wallet was created automatically when you signed in with email or Google. Export your private key any time to import it into MetaMask, Rabby, or any other wallet — that gives you full control of your funds even if TrustWork goes away.
+      </div>
+      <button
+        onClick={handleExport}
+        className="px-4 py-2 border border-[#1c1c1c] text-[#1c1c1c] rounded-md text-[13px] font-medium hover:bg-[#f7f7f5] transition"
+      >
+        🔑 Export private key
+      </button>
+      <div className="text-[11px] text-[#a0a0a0] mt-3 leading-relaxed bg-[#fff8e0] border border-[#f0d0a0] text-[#7c5c00] rounded-md p-2.5">
+        <strong>⚠ Treat this like a password.</strong> Anyone with the private key can spend everything in this wallet. Privy shows it in a separate iframe — TrustWork itself never sees the key.
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -229,11 +271,16 @@ export default function Profile() {
               <strong className="text-[#1c1c1c]">{completed}</strong> jobs completed
             </div>
             <div className="text-[12px] md:text-[13px] text-[#6b6b6b]">
-              <strong className="text-[#1c1c1c]">${formatUSDC(data.totalEarnedWei, 0)}</strong> USDC earned
+              <strong className="text-[#1c1c1c]">${formatUSDC(data.totalEarnedWei)}</strong> USDC earned
             </div>
             <div className="text-[12px] md:text-[13px] text-[#6b6b6b]">
               <strong className="text-[#1c1c1c]">{data.flags.toString()}</strong> flags
             </div>
+            {isOwn && (
+              <div className="text-[12px] md:text-[13px] text-[#6b6b6b]">
+                <strong className="text-[#14a800]">${formatUSDC(data.usdcBalance)}</strong> USDC in wallet
+              </div>
+            )}
           </div>
         </div>
         {isOwn && !editing && (
@@ -258,6 +305,7 @@ export default function Profile() {
 
       {/* Email notifications — only on your own profile */}
       {isOwn && <EmailNotificationsSection />}
+      {isOwn && <WalletExportSection />}
 
       {/* About */}
       {meta?.bio && (
