@@ -88,20 +88,26 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — fixed below nav (h-14) so it stays in viewport while scrolling. */}
       {open && (
-        <div className="md:hidden bg-white border-b border-[#e0e0dc] px-4 py-3 flex flex-col gap-1 z-40">
-          {links.map(({ to, label }) => (
-            <NavLink key={to} to={to} end className={linkCls} onClick={() => setOpen(false)}>
-              {label}
-            </NavLink>
-          ))}
-          <div className="border-t border-[#e0e0dc] mt-2 pt-2">
-            <button onClick={handleSignOut} className="w-full text-left px-3 py-1.5 text-[13px] text-red-500 rounded-md hover:bg-red-50">
-              Sign out
-            </button>
+        <>
+          <div
+            className="md:hidden fixed inset-0 top-14 bg-black/20 z-30"
+            onClick={() => setOpen(false)}
+          />
+          <div className="md:hidden fixed top-14 left-0 right-0 bg-white border-b border-[#e0e0dc] shadow-lg px-4 py-3 flex flex-col gap-1 z-40 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+            {links.map(({ to, label }) => (
+              <NavLink key={to} to={to} end className={linkCls} onClick={() => setOpen(false)}>
+                {label}
+              </NavLink>
+            ))}
+            <div className="border-t border-[#e0e0dc] mt-2 pt-2">
+              <button onClick={handleSignOut} className="w-full text-left px-3 py-1.5 text-[13px] text-red-500 rounded-md hover:bg-red-50">
+                Sign out
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   )

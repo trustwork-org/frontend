@@ -59,26 +59,32 @@ export default function LandingNav() {
         </button>
       </nav>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — fixed below nav (h-16) so it stays in viewport while scrolling. */}
       {open && (
-        <div className="md:hidden bg-white border-b border-[#e0e0dc] px-4 py-3 flex flex-col gap-1 z-40">
-          {navLinks.map(({ to, label }) => (
-            <NavLink key={to} to={to} end={to === '/'} className={linkCls} onClick={() => setOpen(false)}>{label}</NavLink>
-          ))}
-          <div className="border-t border-[#e0e0dc] mt-2 pt-2 flex flex-col gap-1">
-            {isAuthed ? (
-              <>
-                <button onClick={() => { navigate('/app'); setOpen(false) }} className="text-left px-3 py-1.5 text-[14px] text-[#14a800] font-medium">Go to App →</button>
-                <button onClick={() => { logout().then(() => navigate('/')); setOpen(false) }} className="text-left px-3 py-1.5 text-[13px] text-red-500">Sign out</button>
-              </>
-            ) : (
-              <>
-                <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#6b6b6b]" onClick={() => setOpen(false)}>Sign in</Link>
-                <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#14a800] font-medium" onClick={() => setOpen(false)}>Get started free →</Link>
-              </>
-            )}
+        <>
+          <div
+            className="md:hidden fixed inset-0 top-16 bg-black/20 z-30"
+            onClick={() => setOpen(false)}
+          />
+          <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-[#e0e0dc] shadow-lg px-4 py-3 flex flex-col gap-1 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto">
+            {navLinks.map(({ to, label }) => (
+              <NavLink key={to} to={to} end={to === '/'} className={linkCls} onClick={() => setOpen(false)}>{label}</NavLink>
+            ))}
+            <div className="border-t border-[#e0e0dc] mt-2 pt-2 flex flex-col gap-1">
+              {isAuthed ? (
+                <>
+                  <button onClick={() => { navigate('/app'); setOpen(false) }} className="text-left px-3 py-1.5 text-[14px] text-[#14a800] font-medium">Go to App →</button>
+                  <button onClick={() => { logout().then(() => navigate('/')); setOpen(false) }} className="text-left px-3 py-1.5 text-[13px] text-red-500">Sign out</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#6b6b6b]" onClick={() => setOpen(false)}>Sign in</Link>
+                  <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#14a800] font-medium" onClick={() => setOpen(false)}>Get started free →</Link>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   )
