@@ -11,6 +11,7 @@ import type { Job } from '../types/job'
 const ZERO = '0x0000000000000000000000000000000000000000'
 
 const STATUS_TONE: Record<JobStatus, string> = {
+  NONE: 'bg-gray-100 text-gray-400',
   OPEN: 'bg-[#e6f4e1] text-[#0d7a00]',
   ACTIVE: 'bg-[#e6f0fa] text-[#0066c0]',
   DISPUTED: 'bg-[#fff2e0] text-[#b25600]',

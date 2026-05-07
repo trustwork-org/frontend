@@ -107,7 +107,9 @@ export function useJobs() {
         const jobR = results[i * 2]
         const msR = results[i * 2 + 1]
         if (jobR.status !== 'success' || msR.status !== 'success') continue
-        decoded.push(shapeJob(jobR.result as unknown as RawJob, msR.result as unknown as RawMilestone[]))
+        const j = shapeJob(jobR.result as unknown as RawJob, msR.result as unknown as RawMilestone[])
+        if (j.status === 'NONE') continue // job slot doesn't exist
+        decoded.push(j)
       }
       decoded.sort((a, b) => Number(b.createdAt - a.createdAt))
       setJobs(decoded)

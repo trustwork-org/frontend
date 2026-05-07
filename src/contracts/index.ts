@@ -5,7 +5,9 @@ export { ProfileRegistryAbi } from './abis/ProfileRegistry'
 export { ReputationNFTAbi } from './abis/ReputationNFT'
 export { erc20Abi } from './abis/erc20'
 
-export const JOB_STATUS = ['OPEN', 'ACTIVE', 'DISPUTED', 'COMPLETED', 'CLOSED', 'CANCELLED'] as const
+// On-chain JobStatus enum order — must match EscrowPlatform.sol exactly.
+// Index 0 is NONE ("job doesn't exist") which the UI never displays.
+export const JOB_STATUS = ['NONE', 'OPEN', 'ACTIVE', 'DISPUTED', 'COMPLETED', 'CLOSED', 'CANCELLED'] as const
 export type JobStatus = (typeof JOB_STATUS)[number]
 
 export const MILESTONE_STATUS = ['PENDING', 'SUBMITTED', 'RELEASED', 'DISPUTED', 'CLIENT_WON', 'FREELANCER_WON'] as const

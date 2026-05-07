@@ -5,7 +5,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal'
 import { FaLock, FaBolt, FaBalanceScale, FaMedal, FaGlobe, FaFileContract, FaArrowRight } from 'react-icons/fa'
 import { FiCheckCircle } from 'react-icons/fi'
 import TypewriterText from '../components/TypewriterText'
-import AnimatedCounter from '../components/AnimatedCounter'
+import { useLandingStats, formatUsdcShort } from '../hooks/useLandingStats'
 
 // ── Variants ─────────────────────────────────────────────────────────────────
 const fadeUp = {
@@ -60,12 +60,7 @@ const compare = [
   { feature: 'Login', them: 'Email/password only', us: 'Wallet or Google (your choice)' },
 ]
 
-const stats = [
-  { num: '$2.4M', label: 'Total escrowed' },
-  { num: '3,841', label: 'Active jobs' },
-  { num: '12,400+', label: 'Freelancers' },
-  { num: '98.2%', label: 'Completion rate' },
-]
+// Stats are read live from the deployed contracts in the Landing component.
 
 // ── Parallax section wrapper ──────────────────────────────────────────────────
 function ParallaxSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -76,6 +71,39 @@ function ParallaxSection({ children, className = '' }: { children: React.ReactNo
     <div ref={ref} className={`relative overflow-hidden ${className}`}>
       <motion.div style={{ y }}>{children}</motion.div>
     </div>
+  )
+}
+
+// ── Live on-chain stats ───────────────────────────────────────────────────────
+function LiveStatsSection() {
+  const { stats, loading } = useLandingStats()
+
+  const rows = [
+    { num: stats ? formatUsdcShort(stats.totalEscrowedUsdc) : '—', label: 'Total in escrow' },
+    { num: stats ? stats.jobsPosted.toString() : '—', label: 'Jobs posted' },
+    { num: stats ? stats.disputes.toString() : '—', label: 'Disputes opened' },
+    { num: stats ? stats.arbitrators.toString() : '—', label: 'Arbitrators staked' },
+  ]
+
+  return (
+    <section className="bg-[#1e1e2d] text-white py-10 overflow-hidden">
+      <motion.div className="max-w-[1100px] mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+        variants={stagger(0.12)} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
+        {rows.map(({ num, label }) => (
+          <motion.div key={label} variants={fadeUp}>
+            <motion.div className="text-[32px] md:text-[40px] font-bold text-[#14a800]"
+              initial={{ scale: 0.5, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }} transition={{ type: 'spring', stiffness: 120, delay: 0.1 }}>
+              {num}
+            </motion.div>
+            <div className="text-[11px] text-[#999] uppercase tracking-widest mt-1">{label}</div>
+          </motion.div>
+        ))}
+      </motion.div>
+      <div className="text-center text-[10px] text-[#666] mt-4 uppercase tracking-widest">
+        {loading ? 'reading from sepolia…' : 'live · ethereum sepolia'}
+      </div>
+    </section>
   )
 }
 
@@ -276,22 +304,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="bg-[#1e1e2d] text-white py-10 overflow-hidden">
-        <motion.div className="max-w-[1100px] mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
-          variants={stagger(0.12)} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
-          {stats.map(({ num, label }) => (
-            <motion.div key={label} variants={fadeUp}>
-              <motion.div className="text-[32px] md:text-[40px] font-bold text-[#14a800]"
-                initial={{ scale: 0.5, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }} transition={{ type: 'spring', stiffness: 120, delay: 0.1 }}>
-                <AnimatedCounter to={num} />
-              </motion.div>
-              <div className="text-[11px] text-[#999] uppercase tracking-widest mt-1">{label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
+      <LiveStatsSection />
 
       {/* ── FEATURES ── */}
       <ParallaxSection className="py-20 md:py-28 bg-[#f7f7f5]">
