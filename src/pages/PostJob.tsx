@@ -37,7 +37,7 @@ export default function PostJob() {
   const navigate = useNavigate()
   const { isAuthed } = useAuth()
   const { balance } = useUSDC()
-  const { create, step, error, jobId, txHash, reset } = useCreateJob()
+  const { create, step, jobId, txHash } = useCreateJob()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -187,12 +187,6 @@ export default function PostJob() {
             Job #{jobId.toString()} created. {txHash && <a href={EXPLORER.tx(txHash)} target="_blank" rel="noopener" className="underline">view tx</a>} · Redirecting…
           </div>
         )}
-        {step === 'error' && error && (
-          <div className="mt-3 text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
-            {error} <button onClick={reset} className="underline ml-1">dismiss</button>
-          </div>
-        )}
-
         <button
           onClick={submit}
           disabled={submitting || formInvalid || insufficient}

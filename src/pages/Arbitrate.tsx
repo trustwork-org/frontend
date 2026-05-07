@@ -180,11 +180,6 @@ export default function Arbitrate() {
             {actions.state.txHash && <> · <a href={EXPLORER.tx(actions.state.txHash)} target="_blank" rel="noopener" className="underline">view tx</a></>}
           </div>
         )}
-        {actions.state.error && (
-          <div className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-md p-2 mt-3">
-            {actions.state.error} <button onClick={actions.reset} className="underline ml-1">dismiss</button>
-          </div>
-        )}
       </div>
 
       {/* Assigned disputes */}

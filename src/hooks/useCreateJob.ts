@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { parseEventLogs } from 'viem'
 import { ADDRESSES, EscrowPlatformAbi, JOB_CATEGORY, type JobCategory } from '../contracts'
 import { publicClient } from '../lib/viem'
+import { toastError, toastSuccess } from '../lib/toast'
 import { useWalletClient } from './useWalletClient'
 import { useUSDC, parseUSDC } from './useUSDC'
 import { encodeFirstMilestone, type JobMeta } from '../utils/jobMeta'
@@ -49,19 +50,19 @@ export function useCreateJob() {
   const create = useCallback(
     async (input: CreateJobInput) => {
       if (!walletClient || !address) {
-        setError('Wallet not connected')
-        setStep('error')
+        const m = 'Wallet not connected.'
+        setError(m); setStep('error'); toastError(null, m)
         return
       }
       if (input.milestones.length === 0) {
-        setError('Add at least one milestone')
-        setStep('error')
+        const m = 'Add at least one milestone.'
+        setError(m); setStep('error'); toastError(null, m)
         return
       }
       const deadlineSec = BigInt(Math.floor(input.deadline.getTime() / 1000))
       if (deadlineSec <= BigInt(Math.floor(Date.now() / 1000))) {
-        setError('Deadline must be in the future')
-        setStep('error')
+        const m = 'Deadline must be in the future.'
+        setError(m); setStep('error'); toastError(null, m)
         return
       }
 
@@ -110,11 +111,13 @@ export function useCreateJob() {
         await refreshUSDC()
         setJobId(createdId)
         setStep('success')
+        toastSuccess(createdId !== null ? `Job #${createdId} posted on-chain.` : 'Job posted on-chain.')
         return createdId
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to create job'
         setError(message)
         setStep('error')
+        toastError(err)
         throw err
       }
     },

@@ -1,7 +1,20 @@
 import { useCallback, useState } from 'react'
 import { ADDRESSES, EscrowPlatformAbi } from '../contracts'
 import { publicClient } from '../lib/viem'
+import { toastError, toastSuccess } from '../lib/toast'
 import { useWalletClient } from './useWalletClient'
+
+const SUCCESS_MESSAGES: Record<string, string> = {
+  applyToJob: 'Application submitted.',
+  approveApplicant: 'Applicant approved — work can begin.',
+  submitMilestone: 'Milestone submitted for review.',
+  approveMilestone: 'Milestone approved · USDC released.',
+  rejectMilestone: 'Milestone rejected · freelancer can revise.',
+  raiseDispute: 'Dispute opened.',
+  selfReportPoorWork: 'Poor work reported.',
+  cancelJob: 'Job cancelled · refund issued.',
+  rescueClientRefund: 'Rescue refund issued.',
+}
 
 export type EscrowActionName =
   | 'applyToJob'
@@ -32,7 +45,10 @@ export function useEscrowActions() {
       functionName: string,
       args: readonly unknown[],
     ) => {
-      if (!walletClient || !address) throw new Error('Wallet not connected')
+      if (!walletClient || !address) {
+        toastError(null, 'Wallet not connected.')
+        throw new Error('Wallet not connected')
+      }
       try {
         setState({ action, txHash: null, error: null })
         const hash = await walletClient.writeContract({
@@ -47,10 +63,12 @@ export function useEscrowActions() {
         setState({ action, txHash: hash, error: null })
         await publicClient.waitForTransactionReceipt({ hash })
         setState({ action: null, txHash: hash, error: null })
+        toastSuccess(SUCCESS_MESSAGES[action] || 'Transaction confirmed.')
         return hash
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Transaction failed'
         setState({ action: null, txHash: null, error: message })
+        toastError(err)
         throw err
       }
     },

@@ -81,7 +81,7 @@ function ProfileEditor({
   onSaved: () => void
   onCancel: () => void
 }) {
-  const { save, step, error, reset } = useSaveProfile()
+  const { save, step } = useSaveProfile()
   const [name, setName] = useState(initial.name || '')
   const [headline, setHeadline] = useState(initial.headline || '')
   const [bio, setBio] = useState(initial.bio || '')
@@ -136,12 +136,6 @@ function ProfileEditor({
           Saving CID on-chain — confirm in your wallet.
         </div>
       )}
-      {error && (
-        <div className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2 mt-3">
-          {error} <button onClick={reset} className="underline ml-1">dismiss</button>
-        </div>
-      )}
-
       <div className="flex gap-2 mt-4">
         <button
           disabled={submitting}

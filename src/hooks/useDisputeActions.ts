@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { ADDRESSES, DisputeDAOAbi, EscrowPlatformAbi, erc20Abi } from '../contracts'
 import { publicClient } from '../lib/viem'
 import { pinJSON, pinFile } from '../lib/pinata'
+import { toastError, toastSuccess } from '../lib/toast'
 import { useWalletClient } from './useWalletClient'
 
 export type DisputeAction =
@@ -36,7 +37,17 @@ export function useDisputeActions() {
   const setSent = (action: DisputeAction, hash: `0x${string}`) =>
     setState({ action, txHash: hash, error: null })
   const setIdle = () => setState({ action: null, txHash: null, error: null })
-  const setErr = (msg: string) => setState({ action: null, txHash: null, error: msg })
+  const succeed = (message: string) => {
+    setState({ action: null, txHash: null, error: null })
+    toastSuccess(message)
+  }
+  // Accepts an unknown error, normalises to a message for state, fires the
+  // friendly toast for the user. The full error is also logged for debugging.
+  const setErr = (err: unknown, fallback?: string) => {
+    const msg = err instanceof Error ? err.message : (typeof err === 'string' ? err : (fallback || 'Operation failed'))
+    setState({ action: null, txHash: null, error: msg })
+    toastError(err ?? null, fallback)
+  }
 
   const ensureWallet = () => {
     if (!walletClient || !address) throw new Error('Wallet not connected')
@@ -63,7 +74,7 @@ export function useDisputeActions() {
       setIdle()
       return cid
     } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Failed to upload evidence')
+      setErr(err, 'Failed to upload evidence')
       throw err
     }
   }, [])
@@ -83,10 +94,10 @@ export function useDisputeActions() {
         })
         setSent('raiseDispute', hash)
         await publicClient.waitForTransactionReceipt({ hash })
-        setIdle()
+        succeed('Dispute opened.')
         return hash
       } catch (err) {
-        setErr(err instanceof Error ? err.message : 'Failed to raise dispute')
+        setErr(err, 'Failed to raise dispute')
         throw err
       }
     },
@@ -108,10 +119,10 @@ export function useDisputeActions() {
         })
         setSent('submitEvidence', hash)
         await publicClient.waitForTransactionReceipt({ hash })
-        setIdle()
+        succeed('Evidence submitted.')
         return hash
       } catch (err) {
-        setErr(err instanceof Error ? err.message : 'Failed to submit evidence')
+        setErr(err, 'Failed to submit evidence')
         throw err
       }
     },
@@ -133,10 +144,10 @@ export function useDisputeActions() {
         })
         setSent('approve', hash)
         await publicClient.waitForTransactionReceipt({ hash })
-        setIdle()
+        succeed('USDC spending approved.')
         return hash
       } catch (err) {
-        setErr(err instanceof Error ? err.message : 'Failed to approve USDC')
+        setErr(err, 'Failed to approve USDC')
         throw err
       }
     },
@@ -157,10 +168,10 @@ export function useDisputeActions() {
       })
       setSent('joinPool', hash)
       await publicClient.waitForTransactionReceipt({ hash })
-      setIdle()
+      succeed('Joined arbitrator pool.')
       return hash
     } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Failed to join pool')
+      setErr(err, 'Failed to join pool')
       throw err
     }
   }, [walletClient, address])
@@ -179,10 +190,10 @@ export function useDisputeActions() {
       })
       setSent('leavePool', hash)
       await publicClient.waitForTransactionReceipt({ hash })
-      setIdle()
+      succeed('Left arbitrator pool.')
       return hash
     } catch (err) {
-      setErr(err instanceof Error ? err.message : 'Failed to leave pool')
+      setErr(err, 'Failed to leave pool')
       throw err
     }
   }, [walletClient, address])
@@ -202,10 +213,10 @@ export function useDisputeActions() {
         })
         setSent('submitVote', hash)
         await publicClient.waitForTransactionReceipt({ hash })
-        setIdle()
+        succeed('Vote submitted.')
         return hash
       } catch (err) {
-        setErr(err instanceof Error ? err.message : 'Failed to submit vote')
+        setErr(err, 'Failed to submit vote')
         throw err
       }
     },
@@ -227,10 +238,10 @@ export function useDisputeActions() {
         })
         setSent('resolveDispute', hash)
         await publicClient.waitForTransactionReceipt({ hash })
-        setIdle()
+        succeed('Dispute resolved.')
         return hash
       } catch (err) {
-        setErr(err instanceof Error ? err.message : 'Failed to resolve dispute')
+        setErr(err, 'Failed to resolve dispute')
         throw err
       }
     },
