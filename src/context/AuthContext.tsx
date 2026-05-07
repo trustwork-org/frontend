@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { api } from '../lib/api'
 
 interface AuthContextType {
   isAuthed: boolean
@@ -8,6 +9,7 @@ interface AuthContextType {
   /** Smart wallet address (ERC-4337) or embedded EOA */
   address: string | null
   displayAddress: string | null
+  email: string | null
   login: () => void
   logout: () => Promise<void>
 }
@@ -23,21 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const externalWallet = wallets.find(w => w.connectorType === 'injected' || w.connectorType === 'wallet_connect' || w.connectorType === 'coinbase_wallet')
   const address = smartWallet?.address ?? externalWallet?.address ?? wallets[0]?.address ?? null
   const displayAddress = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : null
+  const email = user?.email?.address ?? null
 
-  // On first login: store email + wallet address in backend so we can send emails
   useEffect(() => {
-    const email = user?.email?.address
     if (!authenticated || !address || !email) return
-
-    fetch('/api/account/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ walletAddress: address, email }),
-    }).catch(console.error)
-  }, [authenticated, address])
+    api.registerAccount(address, email).catch(err => {
+      console.error('Failed to register account with backend:', err)
+    })
+  }, [authenticated, address, email])
 
   return (
-    <AuthContext.Provider value={{ isAuthed: authenticated, isLoading: !ready, address, displayAddress, login, logout }}>
+    <AuthContext.Provider value={{ isAuthed: authenticated, isLoading: !ready, address, displayAddress, email, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
