@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 const links = [
   { to: '/app', label: 'Find Work' },
   { to: '/app/dashboard', label: 'My Jobs' },
+  { to: '/app/activity', label: 'Activity' },
   { to: '/app/chat', label: 'Messages' },
   { to: '/app/dispute', label: 'Disputes' },
   { to: '/app/arbitrate', label: 'Arbitrate' },
@@ -29,10 +31,10 @@ export default function Navbar() {
   return (
     <>
       <nav className="bg-white border-b border-[#e0e0dc] flex items-center px-4 md:px-6 h-14 gap-4 sticky top-0 z-50">
-        {/* Logo */}
-        <span className="text-[22px] text-[#14a800] shrink-0" style={{ fontFamily: "'DM Serif Display', serif" }}>
+        {/* Logo — links to landing page */}
+        <NavLink to="/" className="text-[22px] text-[#14a800] shrink-0 hover:opacity-80 transition-opacity" style={{ fontFamily: "'DM Serif Display', serif" }}>
           TrustWork
-        </span>
+        </NavLink>
 
         {/* Desktop nav links */}
         <div className="hidden md:flex gap-0.5 flex-1">
@@ -49,13 +51,19 @@ export default function Navbar() {
           >
             + Post a Job
           </button>
+          <NotificationBell />
           <div className="relative group">
             <div className="w-8 h-8 rounded-full bg-[#14a800] text-white text-[13px] font-semibold flex items-center justify-center cursor-pointer">
               {initials}
             </div>
-            <div className="absolute right-0 top-10 bg-white border border-[#e0e0dc] rounded-xl shadow-lg py-1 w-40 hidden group-hover:block z-50">
-              <NavLink to="/app/profile" className="block px-4 py-2 text-[13px] text-[#1c1c1c] hover:bg-[#f7f7f5]">Profile</NavLink>
-              <button onClick={handleSignOut} className="w-full text-left px-4 py-2 text-[13px] text-red-500 hover:bg-red-50">Sign out</button>
+            {/* Hover zone starts at the avatar's bottom edge (top-8) so the cursor
+                never leaves a hovered element while travelling down to the menu.
+                pt-2 inside keeps the visible card visually spaced from the avatar. */}
+            <div className="absolute right-0 top-8 pt-2 w-40 hidden group-hover:block z-50">
+              <div className="bg-white border border-[#e0e0dc] rounded-xl shadow-lg py-1">
+                <NavLink to="/app/profile" className="block px-4 py-2 text-[13px] text-[#1c1c1c] hover:bg-[#f7f7f5]">Profile</NavLink>
+                <button onClick={handleSignOut} className="w-full text-left px-4 py-2 text-[13px] text-red-500 hover:bg-red-50">Sign out</button>
+              </div>
             </div>
           </div>
         </div>

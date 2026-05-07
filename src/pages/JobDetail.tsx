@@ -9,6 +9,7 @@ import { formatDeadline, shortAddress, timeAgo } from '../utils/format'
 import type { Milestone } from '../types/job'
 
 const STATUS_LABEL: Record<JobStatus, string> = {
+  NONE: '—',
   OPEN: 'Open',
   ACTIVE: 'In progress',
   DISPUTED: 'Disputed',
@@ -17,6 +18,7 @@ const STATUS_LABEL: Record<JobStatus, string> = {
   CANCELLED: 'Cancelled',
 }
 const STATUS_TONE: Record<JobStatus, string> = {
+  NONE: 'text-[#a0a0a0] bg-[#f0f0ed]',
   OPEN: 'text-[#0d7a00] bg-[#e6f4e1]',
   ACTIVE: 'text-[#0066c0] bg-[#e6f0fa]',
   DISPUTED: 'text-[#b25600] bg-[#fff2e0]',

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { usePrivy } from '@privy-io/react-auth'
 import { EXPLORER } from '../contracts'
 import { useAuth } from '../context/AuthContext'
 import { useProfile, type ProfileMetadata } from '../hooks/useProfile'
@@ -21,6 +22,52 @@ function initials(name: string | undefined, addr: string): string {
     return parts.map(p => p[0]?.toUpperCase() || '').join('') || addr.slice(2, 4).toUpperCase()
   }
   return addr.slice(2, 4).toUpperCase()
+}
+
+/**
+ * For wallet-only sign-ins, the user has no email and so receives no
+ * notifications. This section lets them link an email to their Privy account
+ * after the fact. Once Privy returns with `user.email.address` populated, the
+ * existing AuthContext effect auto-registers them with the backend — no extra
+ * plumbing needed.
+ */
+function EmailNotificationsSection() {
+  const { user, linkEmail } = usePrivy()
+  const email = user?.email?.address ?? null
+
+  return (
+    <div className="bg-white border border-[#e0e0dc] rounded-xl p-4 md:p-5 mb-3">
+      <div className="text-[14px] md:text-[15px] font-semibold mb-3 pb-2.5 border-b border-[#e0e0dc]">
+        Email notifications
+      </div>
+      {email ? (
+        <div>
+          <div className="text-[13px] text-[#6b6b6b]">
+            <span className="text-[#0d7a00] font-medium">✓ Linked:</span>{' '}
+            <span className="text-[#1c1c1c] font-mono">{email}</span>
+          </div>
+          <div className="text-[11px] text-[#a0a0a0] mt-2 leading-relaxed">
+            You'll receive emails when someone applies to your jobs, when milestones are submitted or approved, and when a dispute is opened or resolved.
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="text-[13px] text-[#6b6b6b] mb-3 leading-relaxed">
+            Add an email to receive notifications about applications, milestone reviews, and disputes. Without an email, you'll only see updates inside the app.
+          </div>
+          <button
+            onClick={() => linkEmail()}
+            className="px-4 py-2 bg-[#14a800] text-white rounded-md text-[13px] font-medium hover:bg-[#0d7a00] transition"
+          >
+            + Add email
+          </button>
+          <div className="text-[11px] text-[#a0a0a0] mt-2">
+            Privy will send a verification code. Your email is only used for TrustWork notifications.
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ProfileEditor({
@@ -214,6 +261,9 @@ export default function Profile() {
           onCancel={() => setEditing(false)}
         />
       )}
+
+      {/* Email notifications — only on your own profile */}
+      {isOwn && <EmailNotificationsSection />}
 
       {/* About */}
       {meta?.bio && (

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { api } from '../lib/api'
+import { selectActiveWallet } from '../lib/wallet'
 
 interface AuthContextType {
   isAuthed: boolean
@@ -20,10 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { ready, authenticated, user, login, logout } = usePrivy()
   const { wallets } = useWallets()
 
-  // Prefer smart wallet (social login users), fall back to connected EOA (wallet users)
-  const smartWallet = wallets.find(w => w.connectorType === 'smart_wallet')
-  const externalWallet = wallets.find(w => w.connectorType === 'injected' || w.connectorType === 'wallet_connect' || w.connectorType === 'coinbase_wallet')
-  const address = smartWallet?.address ?? externalWallet?.address ?? wallets[0]?.address ?? null
+  const activeWallet = selectActiveWallet(wallets)
+  const address = activeWallet?.address ?? null
   const displayAddress = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : null
   const email = user?.email?.address ?? null
 

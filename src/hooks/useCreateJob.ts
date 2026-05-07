@@ -98,7 +98,7 @@ export function useCreateJob() {
           chain: walletClient.chain,
         })
         setTxHash(hash)
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 90_000 })
 
         const events = parseEventLogs({
           abi: EscrowPlatformAbi,

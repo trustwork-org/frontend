@@ -20,6 +20,7 @@ import Dispute from './pages/Dispute'
 import Arbitrate from './pages/Arbitrate'
 import Profile from './pages/Profile'
 import Chat from './pages/Chat'
+import Activity from './pages/Activity'
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/app/dispute" element={<AppLayout><Dispute /></AppLayout>} />
           <Route path="/app/arbitrate" element={<AppLayout><Arbitrate /></AppLayout>} />
           <Route path="/app/chat" element={<AppLayout><Chat /></AppLayout>} />
+          <Route path="/app/activity" element={<AppLayout><Activity /></AppLayout>} />
           <Route path="/app/profile" element={<AppLayout><Profile /></AppLayout>} />
           <Route path="/app/profile/:address" element={<AppLayout><Profile /></AppLayout>} />
         </Routes>
