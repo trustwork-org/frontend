@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { parseAbiItem, type Hex } from 'viem'
 import { ADDRESSES } from '../contracts'
 import { publicClient } from '../lib/viem'
@@ -53,24 +53,33 @@ const E = {
   TierUpgraded: parseAbiItem('event TierUpgraded(address indexed freelancer, uint256 indexed burnedTokenId, uint256 indexed newTokenId, uint8 fromTier, uint8 toTier)'),
 } as const
 
-export function useActivity(address: `0x${string}` | null | undefined) {
+export interface UseActivityOptions {
+  /** If set, refetches every `pollIntervalMs` milliseconds in addition to the
+   *  initial fetch. Useful for the notification bell which needs near-real-time
+   *  updates without forcing the user to refresh the page. */
+  pollIntervalMs?: number
+}
+
+export function useActivity(
+  address: `0x${string}` | null | undefined,
+  options?: UseActivityOptions,
+) {
   const [entries, setEntries] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [latestBlock, setLatestBlock] = useState<bigint>(0n)
+  const cancelledRef = useRef(false)
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     if (!address) {
       setEntries([])
       setLoading(false)
       return
     }
-    let cancelled = false
-    setLoading(true)
+    cancelledRef.current = false
     setError(null)
 
-    ;(async () => {
-      try {
+    try {
         const me = address
         const safe = async <T>(fn: () => Promise<T[]>): Promise<T[]> => {
           try { return await fn() } catch (err) { console.warn(err); return [] }
@@ -133,21 +142,33 @@ export function useActivity(address: `0x${string}` | null | undefined) {
 
         all.sort((a, b) => Number(b.blockNumber - a.blockNumber))
 
-        if (!cancelled) {
+        if (!cancelledRef.current) {
           setEntries(all)
           setLatestBlock(latest)
           setLoading(false)
         }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load activity')
-          setLoading(false)
-        }
+    } catch (err) {
+      if (!cancelledRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to load activity')
+        setLoading(false)
       }
-    })()
-
-    return () => { cancelled = true }
+    }
   }, [address])
 
-  return { entries, loading, error, latestBlock }
+  // Initial fetch + cleanup
+  useEffect(() => {
+    cancelledRef.current = false
+    setLoading(true)
+    refresh()
+    return () => { cancelledRef.current = true }
+  }, [refresh])
+
+  // Optional polling
+  useEffect(() => {
+    if (!options?.pollIntervalMs) return
+    const id = setInterval(refresh, options.pollIntervalMs)
+    return () => clearInterval(id)
+  }, [refresh, options?.pollIntervalMs])
+
+  return { entries, loading, error, latestBlock, refresh }
 }

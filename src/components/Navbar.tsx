@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 const links = [
   { to: '/app', label: 'Find Work' },
@@ -50,6 +51,7 @@ export default function Navbar() {
           >
             + Post a Job
           </button>
+          <NotificationBell />
           <div className="relative group">
             <div className="w-8 h-8 rounded-full bg-[#14a800] text-white text-[13px] font-semibold flex items-center justify-center cursor-pointer">
               {initials}
