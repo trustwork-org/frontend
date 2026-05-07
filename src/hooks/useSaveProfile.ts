@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { ADDRESSES, ProfileRegistryAbi } from '../contracts'
 import { publicClient } from '../lib/viem'
 import { pinJSON } from '../lib/pinata'
+import { toastError, toastSuccess } from '../lib/toast'
 import { useWalletClient } from './useWalletClient'
 import type { ProfileMetadata } from './useProfile'
 
@@ -40,11 +41,13 @@ export function useSaveProfile() {
         setTxHash(hash)
         await publicClient.waitForTransactionReceipt({ hash })
         setStep('success')
+        toastSuccess(alreadyRegistered ? 'Profile updated.' : 'Profile created.')
         return { cid, hash }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to save profile'
         setError(message)
         setStep('error')
+        toastError(err, 'Failed to save profile')
         throw err
       }
     },

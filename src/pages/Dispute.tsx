@@ -125,11 +125,6 @@ function RaiseDisputeView() {
           {actions.state.txHash && <> · <a href={EXPLORER.tx(actions.state.txHash)} target="_blank" rel="noopener" className="underline">view tx</a></>}
         </div>
       )}
-      {actions.state.error && (
-        <div className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-md p-2 mt-3">
-          {actions.state.error} <button onClick={actions.reset} className="underline ml-1">dismiss</button>
-        </div>
-      )}
     </div>
   )
 }
@@ -334,11 +329,6 @@ function DisputeDetail({ disputeId }: { disputeId: bigint }) {
         <div className="text-[12px] text-[#6b6b6b] bg-[#f7f7f5] border border-[#e0e0dc] rounded-md p-2 mb-3">
           Action in flight: {actions.state.action}
           {actions.state.txHash && <> · <a href={EXPLORER.tx(actions.state.txHash)} target="_blank" rel="noopener" className="underline">view tx</a></>}
-        </div>
-      )}
-      {actions.state.error && (
-        <div className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-md p-2 mb-3">
-          {actions.state.error} <button onClick={actions.reset} className="underline ml-1">dismiss</button>
         </div>
       )}
     </div>

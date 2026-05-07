@@ -338,13 +338,6 @@ export default function JobDetail() {
           Transaction in flight ({actions.state.action})… {lastTx && <a href={EXPLORER.tx(lastTx)} target="_blank" rel="noopener" className="underline">view tx</a>}
         </div>
       )}
-      {actions.state.error && (
-        <div className="bg-red-50 border border-red-100 text-red-600 rounded-md p-3 mb-3 text-[12px]">
-          {actions.state.error}
-          <button onClick={actions.reset} className="underline ml-2">dismiss</button>
-        </div>
-      )}
-
       {/* Apply CTA — only when OPEN and viewer is not client */}
       {job.status === 'OPEN' && !isClient && (
         <div className="bg-white border border-[#e0e0dc] rounded-xl p-4 md:p-5 mb-4">

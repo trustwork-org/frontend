@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LandingNav from './components/LandingNav'
@@ -64,6 +66,14 @@ export default function App() {
           <Route path="/app/profile" element={<AppLayout><Profile /></AppLayout>} />
           <Route path="/app/profile/:address" element={<AppLayout><Profile /></AppLayout>} />
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          theme="light"
+        />
       </BrowserRouter>
     </AuthProvider>
   )
