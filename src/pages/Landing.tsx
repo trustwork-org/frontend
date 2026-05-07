@@ -126,7 +126,7 @@ const bentoAccents = [
   'from-[#e6f4e1] to-white',
 ]
 
-function BentoCard({ icon, title, desc, index }: { icon: React.ReactNode; title: string; desc: string; index: number }) {
+function BentoCard({ icon, title, desc, index, liveStat }: { icon: React.ReactNode; title: string; desc: string; index: number; liveStat?: string | null }) {
   const isDark = index === 2 || index === 3
   const isWide = index === 0 || index === 5
 
@@ -167,8 +167,8 @@ function BentoCard({ icon, title, desc, index }: { icon: React.ReactNode; title:
         {desc}
       </div>
 
-      {/* Wide card extra — live stat */}
-      {isWide && (
+      {/* Wide card extra — live on-chain stat */}
+      {isWide && liveStat && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -181,7 +181,7 @@ function BentoCard({ icon, title, desc, index }: { icon: React.ReactNode; title:
             transition={{ duration: 1.5, repeat: Infinity }}
             className="w-1.5 h-1.5 rounded-full bg-[#14a800] inline-block"
           />
-          {index === 0 ? '$2.4M locked right now' : '12,400+ freelancers earning'}
+          {liveStat}
         </motion.div>
       )}
     </motion.div>
@@ -195,6 +195,14 @@ export default function Landing() {
   const heroY = useTransform(heroScroll, [0, 1], [0, 120])
   const heroOpacity = useTransform(heroScroll, [0, 0.6], [1, 0])
   const springY = useSpring(heroY, { stiffness: 80, damping: 20 })
+
+  // Live stats injected into the wide bento cards. The two wide cards are at
+  // index 0 (first) and index 5 (last) in the features grid.
+  const { stats: live } = useLandingStats()
+  const bentoLiveStats: Record<number, string | null> = {
+    0: live ? `${formatUsdcShort(live.totalEscrowedUsdc)} locked right now` : null,
+    5: live ? `${live.jobsPosted.toString()} jobs posted on-chain` : null,
+  }
 
   return (
     <div className="bg-[#f7f7f5] overflow-x-hidden">
@@ -328,7 +336,7 @@ export default function Landing() {
             viewport={{ once: true, amount: 0.1 }}
           >
             {features.map(({ icon, title, desc }, i) => (
-              <BentoCard key={title} icon={icon} title={title} desc={desc} index={i} />
+              <BentoCard key={title} icon={icon} title={title} desc={desc} index={i} liveStat={bentoLiveStats[i]} />
             ))}
           </motion.div>
         </div>
