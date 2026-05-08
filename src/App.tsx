@@ -7,10 +7,12 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LandingNav from './components/LandingNav'
 import Navbar from './components/Navbar'
 import StatsBar from './components/StatsBar'
+// Landing is the most common entry route, so we ship it in the main bundle
+// — paying for an extra round-trip-on-first-paint hurts desktop more than
+// the bytes hurt mobile. Other public pages and all protected app pages
+// stay lazy so visitors don't download them unless they navigate.
+import Landing from './pages/Landing'
 
-// Each page is loaded as its own chunk on first navigation. The landing
-// page bundle stays light — pages a visitor never opens never download.
-const Landing = lazy(() => import('./pages/Landing'))
 const FindWork = lazy(() => import('./pages/FindWork'))
 const PostWork = lazy(() => import('./pages/PostWork'))
 const SignIn = lazy(() => import('./pages/SignIn'))
