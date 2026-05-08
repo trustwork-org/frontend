@@ -6,6 +6,12 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     chunkSizeWarningLimit: 2000,
+    // Vite's default behaviour is to emit <link rel="modulepreload"> tags
+    // for every chunk reachable from the entry, including lazy ones. That
+    // warms cache for snappy navigation but defeats the whole point of
+    // lazy-loading the Privy bundle for visitors who only ever see the
+    // landing page. Disable preload so lazy chunks fetch on demand.
+    modulePreload: false,
     rollupOptions: {
       output: {
         // Keep each large dependency in its own self-contained chunk so its

@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { CATEGORY_LABEL, type JobCategory } from '../contracts'
 import { useJobs } from '../hooks/useJobs'
-import { formatUSDC } from '../hooks/useUSDC'
+import { formatUSDC } from '../utils/usdc'
 import { timeAgo, formatDeadline } from '../utils/format'
 
 const TOP_CATS: (JobCategory | 'All')[] = [
@@ -17,7 +16,6 @@ const TOP_CATS: (JobCategory | 'All')[] = [
 ]
 
 export default function FindWork() {
-  const { isAuthed } = useAuth()
   const navigate = useNavigate()
   const { jobs, loading } = useJobs()
   const [search, setSearch] = useState('')
@@ -35,10 +33,9 @@ export default function FindWork() {
       })
   }, [jobs, search, cat])
 
-  const handleApply = () => {
-    if (!isAuthed) navigate('/signin')
-    else navigate('/app')
-  }
+  // Always navigate to /app — ProtectedRoute redirects to /signin if not
+  // authed, then back to /app after login. Public page is Privy-free.
+  const handleApply = () => navigate('/app')
 
   return (
     <div className="bg-[#f7f7f5] min-h-screen">
@@ -77,11 +74,9 @@ export default function FindWork() {
           <span className="text-[14px] text-[#6b6b6b]">
             {loading ? 'Loading…' : `${openJobs.length} open job${openJobs.length === 1 ? '' : 's'}`}
           </span>
-          {!isAuthed && (
-            <Link to="/signin" className="text-[13px] text-[#14a800] font-medium hover:underline">
-              Sign in to apply →
-            </Link>
-          )}
+          <Link to="/signin" className="text-[13px] text-[#14a800] font-medium hover:underline">
+            Sign in to apply →
+          </Link>
         </div>
 
         {loading ? (
@@ -90,7 +85,7 @@ export default function FindWork() {
           <div className="bg-white border border-[#e0e0dc] rounded-2xl p-8 text-center">
             <div className="text-[16px] font-semibold mb-1">No open jobs right now</div>
             <div className="text-[13px] text-[#6b6b6b]">
-              Check back soon, or {isAuthed ? <Link to="/app/post" className="text-[#14a800] hover:underline">post your own job</Link> : <Link to="/signin" className="text-[#14a800] hover:underline">sign in</Link>}.
+              Check back soon, or <Link to="/app/post" className="text-[#14a800] hover:underline">post your own job</Link>.
             </div>
           </div>
         ) : (
@@ -124,7 +119,7 @@ export default function FindWork() {
                     onClick={handleApply}
                     className="px-5 py-2 bg-[#14a800] text-white rounded-full text-[13px] font-medium hover:bg-[#0d7a00] transition-all self-start sm:self-auto"
                   >
-                    {isAuthed ? 'View & apply' : 'Sign in to apply'}
+                    View &amp; apply
                   </button>
                 </div>
               </div>
@@ -132,15 +127,13 @@ export default function FindWork() {
           </div>
         )}
 
-        {!isAuthed && (
-          <div className="mt-8 bg-white border border-[#e0e0dc] rounded-2xl p-6 md:p-8 text-center">
-            <div className="text-[20px] font-bold mb-2">Ready to apply?</div>
-            <p className="text-[14px] text-[#6b6b6b] mb-5">Create your account in seconds. Sign in with Google or connect your wallet — no setup required.</p>
-            <Link to="/signin" className="inline-block px-8 py-3 bg-[#14a800] text-white rounded-full text-[14px] font-semibold hover:bg-[#0d7a00] transition-all">
-              Sign in to apply →
-            </Link>
-          </div>
-        )}
+        <div className="mt-8 bg-white border border-[#e0e0dc] rounded-2xl p-6 md:p-8 text-center">
+          <div className="text-[20px] font-bold mb-2">Ready to apply?</div>
+          <p className="text-[14px] text-[#6b6b6b] mb-5">Create your account in seconds. Sign in with Google or connect your wallet — no setup required.</p>
+          <Link to="/signin" className="inline-block px-8 py-3 bg-[#14a800] text-white rounded-full text-[14px] font-semibold hover:bg-[#0d7a00] transition-all">
+            Sign in to apply →
+          </Link>
+        </div>
       </div>
     </div>
   )
