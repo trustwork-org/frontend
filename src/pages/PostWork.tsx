@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const steps = [
   { n: '1', title: 'Define your job', desc: 'Write a clear title, description, and category. The more detail you give, the better applicants you attract.' },
@@ -18,11 +19,10 @@ const faqs = [
 ]
 
 export default function PostWork() {
+  const { isAuthed } = useAuth()
   const navigate = useNavigate()
 
-  // Always navigate to /app/post — ProtectedRoute redirects to /signin
-  // for users who aren't authed, then back to /app/post after login.
-  const handlePost = () => navigate('/app/post')
+  const handlePost = () => navigate(isAuthed ? '/app/post' : '/signin')
 
   return (
     <div className="bg-[#f7f7f5] min-h-screen">
@@ -38,9 +38,11 @@ export default function PostWork() {
           onClick={handlePost}
           className="px-8 py-3.5 bg-[#14a800] text-white rounded-full text-[15px] font-semibold hover:bg-[#0d7a00] transition-all"
         >
-          Post a Job Now →
+          {isAuthed ? 'Post a Job Now →' : 'Sign in to Post a Job →'}
         </button>
-        <div className="mt-3 text-[13px] text-[#a0a0a0]">Free to sign up · No credit card required</div>
+        {!isAuthed && (
+          <div className="mt-3 text-[13px] text-[#a0a0a0]">Free to sign up · No credit card required</div>
+        )}
       </div>
 
       <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-12">
@@ -116,7 +118,7 @@ export default function PostWork() {
             onClick={handlePost}
             className="px-8 py-3.5 bg-[#14a800] text-white rounded-full text-[15px] font-semibold hover:bg-[#0d7a00] transition-all"
           >
-            Post a Job Now →
+            {isAuthed ? 'Post a Job Now →' : 'Sign in to Post a Job →'}
           </button>
         </div>
       </div>
