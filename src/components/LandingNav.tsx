@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { Link, NavLink } from 'react-router-dom'
+
+// Public-page nav. No useAuth here — Privy isn't loaded on public routes.
+// Logged-in users can still click "Sign in"; Privy will recognise their
+// existing session and redirect them straight into /app.
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -10,8 +13,6 @@ const navLinks = [
 
 export default function LandingNav() {
   const [open, setOpen] = useState(false)
-  const { isAuthed, logout } = useAuth()
-  const navigate = useNavigate()
 
   const linkCls = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-1.5 rounded-md text-[14px] transition-all ${isActive ? 'text-[#14a800] font-medium' : 'text-[#4a4a4a] hover:text-[#1c1c1c]'}`
@@ -32,23 +33,10 @@ export default function LandingNav() {
 
         {/* Desktop right */}
         <div className="hidden md:flex items-center gap-3 ml-auto">
-          {isAuthed ? (
-            <>
-              <button onClick={() => navigate('/app')} className="px-4 py-2 bg-[#14a800] text-white rounded-full text-[13px] font-medium hover:bg-[#0d7a00] transition-all">
-                Go to App →
-              </button>
-              <button onClick={() => { logout().then(() => navigate('/')) }} className="text-[13px] text-[#6b6b6b] hover:text-red-500 transition-colors">
-                Sign out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/signin" className="text-[14px] text-[#6b6b6b] hover:text-[#1c1c1c] transition-colors">Sign in</Link>
-              <Link to="/signin" className="px-4 py-2 bg-[#14a800] text-white rounded-full text-[13px] font-medium hover:bg-[#0d7a00] transition-all">
-                Get started free
-              </Link>
-            </>
-          )}
+          <Link to="/signin" className="text-[14px] text-[#6b6b6b] hover:text-[#1c1c1c] transition-colors">Sign in</Link>
+          <Link to="/signin" className="px-4 py-2 bg-[#14a800] text-white rounded-full text-[13px] font-medium hover:bg-[#0d7a00] transition-all">
+            Get started free
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
@@ -71,17 +59,8 @@ export default function LandingNav() {
               <NavLink key={to} to={to} end={to === '/'} className={linkCls} onClick={() => setOpen(false)}>{label}</NavLink>
             ))}
             <div className="border-t border-[#e0e0dc] mt-2 pt-2 flex flex-col gap-1">
-              {isAuthed ? (
-                <>
-                  <button onClick={() => { navigate('/app'); setOpen(false) }} className="text-left px-3 py-1.5 text-[14px] text-[#14a800] font-medium">Go to App →</button>
-                  <button onClick={() => { logout().then(() => navigate('/')); setOpen(false) }} className="text-left px-3 py-1.5 text-[13px] text-red-500">Sign out</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#6b6b6b]" onClick={() => setOpen(false)}>Sign in</Link>
-                  <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#14a800] font-medium" onClick={() => setOpen(false)}>Get started free →</Link>
-                </>
-              )}
+              <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#6b6b6b]" onClick={() => setOpen(false)}>Sign in</Link>
+              <Link to="/signin" className="px-3 py-1.5 text-[14px] text-[#14a800] font-medium" onClick={() => setOpen(false)}>Get started free →</Link>
             </div>
           </div>
         </>

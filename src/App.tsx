@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LandingNav from './components/LandingNav'
 import Navbar from './components/Navbar'
@@ -13,8 +12,15 @@ import StatsBar from './components/StatsBar'
 // stay lazy so visitors don't download them unless they navigate.
 import Landing from './pages/Landing'
 
+// Public pages are loaded as small chunks. They render without Privy.
 const FindWork = lazy(() => import('./pages/FindWork'))
 const PostWork = lazy(() => import('./pages/PostWork'))
+
+// Privy + AuthProvider live inside this layout. Loading it (and the heavy
+// Privy bundle) is deferred until a user navigates to /signin or /app/*.
+const AuthShell = lazy(() => import('./auth/AuthShell'))
+
+// Protected pages — only loaded after the user has navigated past AuthShell.
 const SignIn = lazy(() => import('./pages/SignIn'))
 const JobBoard = lazy(() => import('./pages/JobBoard'))
 const JobDetail = lazy(() => import('./pages/JobDetail'))
@@ -55,17 +61,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<PublicLayout><Landing /></PublicLayout>} />
-            <Route path="/find-work" element={<PublicLayout><FindWork /></PublicLayout>} />
-            <Route path="/post-work" element={<PublicLayout><PostWork /></PublicLayout>} />
-            <Route path="/signin" element={<SignIn />} />
+    <BrowserRouter>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          {/* Public — no Privy loaded here */}
+          <Route path="/" element={<PublicLayout><Landing /></PublicLayout>} />
+          <Route path="/find-work" element={<PublicLayout><FindWork /></PublicLayout>} />
+          <Route path="/post-work" element={<PublicLayout><PostWork /></PublicLayout>} />
 
-            {/* Protected app routes */}
+          {/* Privy lazy-loads here, then provides auth context to every
+              child route. ProtectedRoute (in AppLayout) handles the redirect
+              if a user reaches an /app/* path without being signed in. */}
+          <Route element={<AuthShell />}>
+            <Route path="/signin" element={<SignIn />} />
             <Route path="/app" element={<AppLayout><JobBoard /></AppLayout>} />
             <Route path="/app/jobs/:jobId" element={<AppLayout><JobDetail /></AppLayout>} />
             <Route path="/app/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
@@ -76,17 +84,17 @@ export default function App() {
             <Route path="/app/activity" element={<AppLayout><Activity /></AppLayout>} />
             <Route path="/app/profile" element={<AppLayout><Profile /></AppLayout>} />
             <Route path="/app/profile/:address" element={<AppLayout><Profile /></AppLayout>} />
-          </Routes>
-        </Suspense>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          newestOnTop
-          closeOnClick
-          pauseOnFocusLoss
-          theme="light"
-        />
-      </BrowserRouter>
-    </AuthProvider>
+          </Route>
+        </Routes>
+      </Suspense>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        theme="light"
+      />
+    </BrowserRouter>
   )
 }
